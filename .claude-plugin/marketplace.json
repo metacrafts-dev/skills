@@ -1,0 +1,20 @@
+{
+	"$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+	"name": "skills",
+	"description": "Handy AI skills",
+	"owner": {
+		"name": "mrt",
+		"email": "info@bitrails.dev"
+	},
+	"plugins": [
+		{
+			"name": "custom-skills",
+			"description": "Custom skills: telegram-ping, refactor-prompt, research-prompt, orchestrate, refine-and-execute-prompt",
+			"author": {
+				"name": "mrt"
+			},
+			"category": "productivity",
+			"source": "./custom-skills"
+		}
+	]
+}
