@@ -23,16 +23,26 @@ Nothing switches the duty off. If unsure whether a stop counts, it counts.
 - Format roles: `<u>` tags the action, `<code>` marks identifiers in line (branch, file, port, command), `<i>` marks a qualifier or aside. Use each where it fits, none by force.
 - Escape literal `& < >` as `&amp; &lt; &gt;`. Under ~300 chars. No secrets, tokens, or connection strings.
 
+## Setup — once per machine
+
+If `~/.config/telegram-ping/chat-id` doesn't exist, ask the user for their chat ID, then save it locally (never commit it):
+
+```bash
+mkdir -p ~/.config/telegram-ping && printf '%s\n' '<their chat id>' > ~/.config/telegram-ping/chat-id
+```
+
 ## Send it
 
 One shell command, `MSG` set first. If the context-mode hook redirects `curl` away from Bash, run the same snippet through the `ctx_execute` tool (language `shell`).
 
 ```bash
 set -a; source /root/.claude/channels/telegram/.env; set +a
-CHAT_ID="1642167676"  # hardcoded: updates are consumed by the channel server on another machine
+CHAT_ID=$(cat ~/.config/telegram-ping/chat-id)
 curl -sf --max-time 10 -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
   -d chat_id="$CHAT_ID" -d parse_mode=HTML --data-urlencode text="$MSG" >/dev/null && echo "telegram: sent" || echo "telegram: SEND FAILED"
 ```
+
+If the chat-id file is missing, run Setup before sending — never guess an ID.
 
 ## Rules
 
