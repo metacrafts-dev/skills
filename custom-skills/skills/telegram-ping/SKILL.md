@@ -17,11 +17,31 @@ Nothing switches the duty off. If unsure whether a stop counts, it counts.
 
 ## Message format
 
-`<b>[task name]</b> <u>Tag:</u> one line` — sent with `parse_mode=HTML`
+Multi-line, four blocks, sent with `parse_mode=HTML`:
 
-- `<b>[task name]</b>` — the decision or task this session is working on (issue, branch, or brief name). Several agents ping Mohamed at once; this title is how he tells them apart.
-- Format roles: `<u>` tags the action, `<code>` marks identifiers in line (branch, file, port, command), `<i>` marks a qualifier or aside. Use each where it fits, none by force.
-- Escape literal `& < >` as `&amp; &lt; &gt;`. Under ~300 chars. No secrets, tokens, or connection strings.
+```
+<b>🔴 [task name]</b>
+<i>one-line description</i>
+
+<u>Tag:</u> headline sentence
+payload…
+```
+
+- **Line 1 — header:** `<b>` + severity emoji + `[task name]`, the decision or task this session is working on (issue, branch, or brief name). Several agents ping Mohamed at once, and the chat-list preview shows only this line — it must tell him who pinged and how urgent, alone.
+- **Line 2 — description:** `<i>` one line on what this session is doing. Omit it when the header already says it.
+- **Blank line, then the stop:** `<u>Tag:</u>` plus a one-line headline of the stop and its cost.
+- **Payload** (only when it carries information): `<code>` marks identifiers in line (branch, file, port, command); `<blockquote>` quotes an error or message; `<blockquote expandable>` when the payload runs past ~4 lines — Telegram renders it collapsed, tap to expand; `<pre><code class="language-…">` for a stack trace or log tail, the only real text colors Telegram offers. Inline ⚠️ / ℹ️ markers when the payload mixes severities.
+
+Severity emoji on line 1, by tag:
+
+| Tag | Emoji |
+| --- | --- |
+| `Blocked:` | 🔴 |
+| `Needs you:` / `Decision needed:` | 🟠 |
+| `Done:` | 🟢 |
+| `Ending:` | 🔵 |
+
+Escape literal `& < >` as `&amp; &lt; &gt;`. Header + description + headline ≤ ~300 chars (the glance cost); total ≤ ~1500 (Telegram hard limit 4096). No secrets, tokens, or connection strings.
 
 ## Setup — once per machine
 
@@ -47,4 +67,4 @@ If the chat-id file is missing, run Setup before sending — never guess an ID.
 ## Rules
 
 - One ping per stop moment. Never skip one, never batch several into one.
-- If the send fails, say so — never claim a ping that didn't happen. Retry once, then report the failure.
+- If the send fails, say so — never claim a ping that didn't happen. On HTTP 400 (malformed HTML) retry once with every tag stripped — a degraded ping beats a missing one; any other failure, retry once as-is, then report.
